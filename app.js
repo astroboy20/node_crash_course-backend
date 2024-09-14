@@ -1,20 +1,63 @@
 const express = require("express");
 //3rd part middleware
-const morgan = require("morgan")
+const morgan = require("morgan");
+//mongoose to connect to the database
+const mongoose = require("mongoose");
+const Blog = require("./models/blog");
 
 //express app
 const app = express();
 
+//connect to mongodb
+const dbURL =
+  "mongodb+srv://tolulopeakinkunmi7:October19!@nodejs.2xlep.mongodb.net/nodejs_tutorials?retryWrites=true&w=majority&appName=nodejs";
+mongoose
+  .connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then((res) => {
+    console.log("connected to db");
+    //port, listen for request when it is connected to the database
+    app.listen(3000);
+  })
+  .catch((err) => console.log(err));
+
+// //mongoose and mono snadbox routes
+// app.get("/add-blog", (req, res) => {
+//   const blog = new Blog({
+//     title: "New blog",
+//     snippet: "About the blog",
+//     body: "This is about the blog",
+//   });
+
+//   blog
+//     .save()
+//     .then((result) => res.send(result))
+//     .catch((err) => {
+//       console.log(err);
+//     });
+// });
+
+// //to get blog
+// app.get("/all-blogs", (req, res) => {
+//   Blog.find()
+//     .then((result) => res.send(result))
+//     .catch((err) => console.log(err));
+// });
+
+// //for a sinlge blog
+// app.get("/single-blog", (req, res) => {
+//   Blog.findById("66e5479cc875cbf1a5098f91")
+//     .then((result) => res.send(result))
+//     .catch((err) => console.log(err));
+// });
+
 //register view engine - we will be using ejs for the view enjine
 app.set("view engine", "ejs");
 // app.set("views", "views")
-//port, listen for request
-app.listen(3000);
 
 //middleware for static files
-app.use(express.static("public"))
+app.use(express.static("public"));
 //morgan middleware
-app.use(morgan("dev"))
+app.use(morgan("dev"));
 
 //a middleware that logs all the request made
 app.use((req, res, next) => {
@@ -27,11 +70,12 @@ app.use((req, res, next) => {
 });
 
 //test
-app.use((req,res,next)=>{
-  console.log("in the next middleware")
-  next()
-})
+app.use((req, res, next) => {
+  console.log("in the next middleware");
+  next();
+});
 
+//routes
 app.get("/", (req, res) => {
   // res.send("Hello, World!")
   // res.sendFile("./views/index.html", { root: __dirname });
@@ -58,7 +102,8 @@ app.get("/", (req, res) => {
     },
   ];
   //render a view
-  res.render("index", { title: "Home", blogs: blogs });
+  // res.render("index", { title: "Home", blogs: blogs });
+  res.redirect("/blogs");
 });
 
 //routing and html
@@ -67,10 +112,17 @@ app.get("/about", (req, res) => {
   res.render("about", { title: "About" });
 });
 
-//redirect
-// app.get("/about-us", (req, res) => {
-//   res.redirect("/about");
-// });
+
+app.get("/blogs", (req, res) => {
+  //sorted from the newest to the oldest
+  Blog.find().sort({createdAt:-1})
+    .then((result) => {
+      res.render("index", { title: "All blogs", blogs: result });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
 
 app.get("/blogs/create", (req, res) => {
   res.render("create", { title: "Create-Blog" });
