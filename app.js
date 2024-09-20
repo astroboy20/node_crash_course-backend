@@ -5,12 +5,10 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 
 const { render } = require("ejs");
-const blogRoutes = require("./routes/blogRoutes")
+const blogRoutes = require("./routes/blogRoutes");
 
 //express app
 const app = express();
-
-
 
 //connect to mongodb
 const dbURL =
@@ -81,7 +79,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
 //blog routes
 
-app.use(blogRoutes)
+app.use(blogRoutes);
